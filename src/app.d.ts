@@ -9,7 +9,11 @@ declare namespace App {
 
 	// interface Platform {}
 
-	// interface Session {}
+	interface Session {
+		userid: string;
+		authenticated: boolean;
+		displayName: string; // preferred_username ?? name ?? email
+	}
 
 	// interface Stuff {}
 }

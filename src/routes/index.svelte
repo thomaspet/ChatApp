@@ -1,8 +1,3 @@
-<script context="module" lang="ts">
-	export const prerender = false;
-	export const hydrate = true;
-</script>
-
 <script lang="ts">
 import { onMount } from "svelte";
 
@@ -22,16 +17,16 @@ import { onMount } from "svelte";
 	}
 
 	onMount(() => {
-		let e = new EventSource('http://localhost:8080/events/messages');
-		e.onopen = () => {
-			console.log("opened");
-		}
-		e.onerror = (e) => {
-			console.log("error", e);
-		}
-		e.onmessage = function(event) {
-			messages = [...messages, event.data];
-		};
+		// let e = new EventSource('http://localhost:8080/events/messages');
+		// e.onopen = () => {
+		// 	console.log("opened");
+		// }
+		// e.onerror = (e) => {
+		// 	console.log("error", e);
+		// }
+		// e.onmessage = function(event) {
+		// 	messages = [...messages, event.data];
+		// };
 	})
 </script>
 
