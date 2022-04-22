@@ -1,33 +1,53 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 
 
 	let messages = []
 	let value = "your message..."
+	let language = "en";
+	let busy = true;
+	let eventsource;
 
 	async function sendMessage() {
-		console.log(value)
-		await fetch("http://localhost:8080/messages", {
+
+		await fetch("api/messages", {
 			method: "POST",
 			headers: {
-				"Content-Type": "text/plain"
+				"Content-Type": "text/plain",
 			},
 			body: value
 		});
+
+		value = "";
 	}
 
 	onMount(() => {
-		// let e = new EventSource('http://localhost:8080/events/messages');
-		// e.onopen = () => {
-		// 	console.log("opened");
-		// }
-		// e.onerror = (e) => {
-		// 	console.log("error", e);
-		// }
-		// e.onmessage = function(event) {
-		// 	messages = [...messages, event.data];
-		// };
+		language = navigator.language || navigator.languages[0]
+		fetch("api/messages")
+			.finally(() => {
+					busy = false;
+			})
+			.then(res => res.json())
+			.then(res => {
+				messages = res.map(m => ({...m, Timestamp: new Date(m.Timestamp)}))
+			})
+
+		eventsource?.close()
+		eventsource = new EventSource('http://localhost:8080/events/messages');
+		eventsource.onopen = () => {
+			console.log("opened");
+		}
+		eventsource.onerror = (e) => {
+			console.log("error", e);
+		}
+		eventsource.onmessage = function(event) {
+			const json = JSON.parse(event.data)
+			json.Timestamp = new Date(json.Timestamp)
+			messages = [...messages, json];
+		};
 	})
+
+	onDestroy(() => eventsource?.close())
 </script>
 
 <svelte:head>
@@ -35,12 +55,12 @@ import { onMount } from "svelte";
 </svelte:head>
 
 <section>
-	{#each messages as message} 
-		<p>{message}</p>
+	{#each messages as m} 
+		<p title={m.Timestamp.toLocaleString()}>({m.Timestamp.toLocaleTimeString(language, {hour12: false})}) {m.Author}: {m.Message}</p>
 	{/each}
 
-	<input type="text /" bind:value>
-	<button on:click={sendMessage}>send</button>
+	<input disabled={busy} type="text /" bind:value on:keypress={e => e.key === 'Enter' ? sendMessage() : null }>
+	<button disabled={busy} on:click={sendMessage}>send</button>
 </section>
 
 <style>
