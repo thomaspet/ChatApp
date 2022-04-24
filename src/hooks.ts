@@ -1,6 +1,7 @@
 import cookie from 'cookie';
 import { v4 as uuid } from '@lukeed/uuid';
 import type { GetSession, Handle } from '@sveltejs/kit';
+import { dev } from '$app/env';
 
 import tokens from "$lib/token";
 
@@ -17,7 +18,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			'set-cookie',
 			cookie.serialize('userid', event.locals.userid, {
 				path: '/',
-				httpOnly: true
+				httpOnly: true,
+				secure: !dev
 			})
 		);
 	}
