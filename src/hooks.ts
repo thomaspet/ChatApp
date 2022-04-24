@@ -30,6 +30,7 @@ export const getSession: GetSession = async (event) => {
 	const token = tokens.getToken(event.locals.userid);
 
 	if (token) {
+		// This is bad.. but uni doesn't use a different endpoint to use an profile token on?
 		const payload = parseJwt(token);
 
 		return {

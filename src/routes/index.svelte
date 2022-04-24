@@ -8,6 +8,8 @@ import { onDestroy, onMount } from "svelte";
 	let busy = true;
 	let eventsource;
 
+	const apiUrl = import.meta.env.VITE_API_URL;
+
 	async function sendMessage() {
 
 		await fetch("api/messages", {
@@ -33,7 +35,8 @@ import { onDestroy, onMount } from "svelte";
 			})
 
 		eventsource?.close()
-		eventsource = new EventSource('http://localhost:8080/events/messages');
+		// Todo pass this through the BFF?
+		eventsource = new EventSource(`${apiUrl}/events/messages`);
 		eventsource.onopen = () => {
 			console.log("opened");
 		}
