@@ -8,7 +8,11 @@ import { onDestroy, onMount } from "svelte";
 	let busy = true;
 	let eventsource;
 
-	const apiUrl = import.meta.env.VITE_API_URL;
+	let apiUrl = import.meta.env.VITE_API_URL;
+
+	if (apiUrl.endsWith("/")) {
+		apiUrl = apiUrl.slice(0, -1);
+	}
 
 	async function sendMessage() {
 

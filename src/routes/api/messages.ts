@@ -1,7 +1,11 @@
 import token from '$lib/token';
 
-const ApiUrl = import.meta.env.VITE_API_URL;
+let ApiUrl = import.meta.env.VITE_API_URL;
 const ApiToken = import.meta.env.VITE_API_TOKEN;
+
+if (ApiUrl.endsWith('/')) {
+    ApiUrl = ApiUrl.slice(0, -1);
+}
 
 export async function post({request, locals}) {
     const body = await request.text();
