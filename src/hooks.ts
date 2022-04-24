@@ -20,7 +20,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 				path: '/',
 				httpOnly: true,
 				secure: !dev,
-				sameSite: 'strict',
 			})
 		);
 	}
