@@ -3,7 +3,7 @@ import { onDestroy, onMount, tick } from "svelte";
 
 
 	let messages = []
-	let value = "your message..."
+	let value = ""
 	let language = "en";
 	let busy = true;
 	let eventsource;
@@ -30,20 +30,28 @@ import { onDestroy, onMount, tick } from "svelte";
 		scrollToBottom = true;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		language = navigator.language || navigator.languages[0]
-		fetch("api/messages")
-			.finally(() => {
-					busy = false;
-			})
-			.then(res => res.json())
-			.then(res => {
-				messages = res.map(m => ({...m, Timestamp: new Date(m.Timestamp)}))
-			})
+
+		let sseToken;
+		try {
+			const response = await fetch("api/messages");
+			const json = await response.json();
+			sseToken = json.Token;
+			messages = json.Messages.map(m => ({...m, Timestamp: new Date(m.Timestamp)}))
+		}
+		catch (error){
+			console.error(error)
+			return;
+		}
+		finally {
+			busy = false;
+		}
 
 		eventsource?.close()
-		// Todo pass this through the BFF?
-		eventsource = new EventSource(`${apiUrl}/events/messages`);
+		// Todo pass this through the BFF? -Impossible without hacks before kit v1.0
+		eventsource = new EventSource(`${apiUrl}/events/messages?token=${sseToken}`);
+		
 		eventsource.onopen = () => {
 			console.log("opened");
 		}
@@ -62,7 +70,7 @@ import { onDestroy, onMount, tick } from "svelte";
 				});
 			}
 		};
-	})
+	});
 
 	onDestroy(() => eventsource?.close())
 </script>
@@ -83,7 +91,7 @@ import { onDestroy, onMount, tick } from "svelte";
 </section>
 <section class="input">
 
-	<input disabled={busy} type="text /" bind:value on:keypress={e => e.key === 'Enter' ? sendMessage() : null }>
+	<input disabled={busy} type="text /" bind:value on:keypress={e => e.key === 'Enter' ? sendMessage() : null } placeholder="Your message...">
 	<button disabled={busy} on:click={sendMessage}>send</button>
 </section>
 
@@ -105,7 +113,7 @@ import { onDestroy, onMount, tick } from "svelte";
 		flex-direction: column;
 		align-items: flex-start;
 
-		max-height: 90vh;
+		height: 90vh;
 		overflow: auto;
 		margin-bottom: 1em;
 	}
